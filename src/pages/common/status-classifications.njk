@@ -1,0 +1,35 @@
+{% macro ring_tag(name) %}
+  {% if name == 'Endorse' %}
+    <span class="govuk-tag govuk-tag--green">{{ name }}</span>
+  {% elif name == 'Pilot' %}
+    <span class="govuk-tag govuk-tag--blue">{{ name }}</span>
+  {% elif name == 'Assess' %}
+    <span class="govuk-tag govuk-tag--orange">{{ name }}</span>
+  {% elif name == 'Do Not Use' %}
+    <span class="govuk-tag govuk-tag--red">{{ name }}</span>
+  {% else %}
+    <span class="govuk-tag">{{ name }}</span>
+  {% endif %}
+{% endmacro %}
+
+{% macro status_classifications() %}
+  <h2 class="govuk-heading-m govuk-!-margin-top-6">Status classifications</h2>
+  <dl class="govuk-summary-list govuk-!-margin-top-2">
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">{{ ring_tag('Endorse') }}</dt>
+      <dd class="govuk-summary-list__value">Endorsed by AICE for use by teams within approved guidelines and appropriate support.</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">{{ ring_tag('Pilot') }}</dt>
+      <dd class="govuk-summary-list__value">Currently being piloted with specific teams or projects, with plans for wider endorsement if successful.</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">{{ ring_tag('Assess') }}</dt>
+      <dd class="govuk-summary-list__value">Under evaluation by <strong>AICE only</strong> and should not be used by teams without prior consultation</dd>
+    </div>
+    <div class="govuk-summary-list__row">
+      <dt class="govuk-summary-list__key">{{ ring_tag('Do Not Use') }}</dt>
+      <dd class="govuk-summary-list__value">Avoid or plan to migrate away due to security, licensing, or support issues.</dd>
+    </div>
+  </dl>
+{% endmacro %}
