@@ -13,7 +13,7 @@ on:
 jobs:
   security-scan:
     name: Security Scanning
-    uses: ./.github/workflows/scan.yml
+    uses: ./.github/workflows/scan.yaml
     secrets: inherit
 
   pr-validator:
