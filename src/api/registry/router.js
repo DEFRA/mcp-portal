@@ -13,22 +13,22 @@ const routes = [
   },
   {
     method: 'GET',
-    path: '/v0.1/servers/{namespace}/{name}/versions/latest',
+    path: '/v0.1/servers/{serverName}/versions/latest',
     handler: registryController.getServerLatest
   },
   {
     method: 'OPTIONS',
-    path: '/v0.1/servers/{namespace}/{name}/versions/latest',
+    path: '/v0.1/servers/{serverName}/versions/latest',
     handler: registryController.optionsServers
   },
   {
     method: 'GET',
-    path: '/v0.1/servers/{namespace}/{name}/versions/{version}',
+    path: '/v0.1/servers/{serverName}/versions/{version}',
     handler: registryController.getServerVersion
   },
   {
     method: 'OPTIONS',
-    path: '/v0.1/servers/{namespace}/{name}/versions/{version}',
+    path: '/v0.1/servers/{serverName}/versions/{version}',
     handler: registryController.optionsServers
   }
 ]

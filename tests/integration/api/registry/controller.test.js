@@ -1,6 +1,21 @@
 import { constants as statusCodes } from 'node:http2'
+import { vi } from 'vitest'
 
 import { createServer } from '../../../../src/server/server.js'
+import fixture from '../../../fixtures/mcp-servers.json'
+
+vi.mock('node:fs/promises', async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    readFile: vi.fn((path, encoding) => {
+      if (typeof path === 'string' && path.endsWith('mcp-servers.json')) {
+        return Promise.resolve(JSON.stringify(fixture))
+      }
+      return actual.readFile(path, encoding)
+    })
+  }
+})
 
 describe('#registryApiController', () => {
   let server
@@ -27,30 +42,30 @@ describe('#registryApiController', () => {
       expect(result.metadata).toMatchObject({ count: expect.any(Number) })
     })
 
-    test('should include the GitHub MCP Server', async () => {
+    test('should include the stdio test server', async () => {
       const { result } = await server.inject({
         method: 'GET',
         url: '/v0.1/servers'
       })
 
-      const githubServer = result.servers.find(
-        (s) => s.server.name === 'io.github.github/github-mcp-server'
+      const stdioServer = result.servers.find(
+        (s) => s.server.name === 'com.example/test-stdio-server'
       )
-      expect(githubServer).toBeDefined()
-      expect(githubServer.server.title).toBe('GitHub MCP Server')
+      expect(stdioServer).toBeDefined()
+      expect(stdioServer.server.title).toBe('Test Stdio Server')
     })
 
-    test('should include the SonarQube MCP Server', async () => {
+    test('should include the http test server', async () => {
       const { result } = await server.inject({
         method: 'GET',
         url: '/v0.1/servers'
       })
 
-      const sonarServer = result.servers.find(
-        (s) => s.server.name === 'com.sonarsource/sonarqube-mcp-server'
+      const httpServer = result.servers.find(
+        (s) => s.server.name === 'com.example/test-http-server'
       )
-      expect(sonarServer).toBeDefined()
-      expect(sonarServer.server.title).toBe('SonarQube MCP Server')
+      expect(httpServer).toBeDefined()
+      expect(httpServer.server.title).toBe('Test HTTP Server')
     })
 
     test('should include CORS headers', async () => {
@@ -79,21 +94,21 @@ describe('#registryApiController', () => {
     })
   })
 
-  describe('GET /v0.1/servers/{namespace}/{name}/versions/latest', () => {
+  describe('GET /v0.1/servers/{serverName}/versions/latest', () => {
     test('should return the latest version of a known server', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.github/github-mcp-server/versions/latest'
+        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-      expect(result.server.name).toBe('io.github.github/github-mcp-server')
+      expect(result.server.name).toBe('com.example/test-stdio-server')
     })
 
     test('should include CORS headers', async () => {
       const { headers } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.github/github-mcp-server/versions/latest'
+        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
       })
 
       expect(headers['access-control-allow-origin']).toBe('*')
@@ -102,38 +117,38 @@ describe('#registryApiController', () => {
     test('should return 404 for unknown server', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.unknown/does-not-exist/versions/latest'
+        url: '/v0.1/servers/com.example%2Fdoes-not-exist/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)
     })
   })
 
-  describe('GET /v0.1/servers/{namespace}/{name}/versions/{version}', () => {
+  describe('GET /v0.1/servers/{serverName}/versions/{version}', () => {
     test('should return a specific version of a known server', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.github/github-mcp-server/versions/0.3.0'
+        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-      expect(result.server.version).toBe('0.3.0')
+      expect(result.server.version).toBe('1.0.0')
     })
 
-    test('should return the SonarQube MCP Server at version latest', async () => {
+    test('should return the http test server at version latest', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.sonarsource/sonarqube-mcp-server/versions/latest'
+        url: '/v0.1/servers/com.example%2Ftest-http-server/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
-      expect(result.server.name).toBe('com.sonarsource/sonarqube-mcp-server')
+      expect(result.server.name).toBe('com.example/test-http-server')
     })
 
     test('should include CORS headers', async () => {
       const { headers } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.github/github-mcp-server/versions/0.3.0'
+        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
       })
 
       expect(headers['access-control-allow-origin']).toBe('*')
@@ -142,7 +157,7 @@ describe('#registryApiController', () => {
     test('should return 404 for unknown version', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/io.github.github/github-mcp-server/versions/99.0.0'
+        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/99.0.0'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)
