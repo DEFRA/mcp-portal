@@ -9,8 +9,8 @@ import { getServers } from '../../api/registry/service.js'
  *
  * @returns {import('@hapi/hapi').ResponseObject} The response object for the homepage
  */
-function getRegistry (_request, h) {
-  const servers = getServers()
+async function getRegistry (_request, h) {
+  const servers = await getServers()
   return h.view('registry/page.njk', { servers })
     .code(statusCodes.HTTP_STATUS_OK)
 }
