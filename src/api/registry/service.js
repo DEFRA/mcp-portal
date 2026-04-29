@@ -1,10 +1,10 @@
-import { readFile } from 'node:fs/promises'
-import { fileURLToPath } from 'node:url'
-import { dirname, join } from 'node:path'
+import * as fs from 'node:fs/promises'
+import * as url from 'node:url'
+import path from 'node:path'
 
 import Joi from 'joi'
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 
 /**
  * @typedef {object} McpServer
@@ -49,8 +49,8 @@ async function _loadServers () {
     return cachedServers
   }
 
-  const dataPath = join(__dirname, '../../data/mcp-servers.json')
-  const rawData = await readFile(dataPath, 'utf8')
+  const dataPath = path.join(__dirname, '../../data/mcp-servers.json')
+  const rawData = await fs.readFile(dataPath, 'utf8')
   const parsedData = JSON.parse(rawData)
 
   const { error, value } = serversSchema.validate(parsedData)
