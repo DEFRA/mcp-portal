@@ -1,0 +1,118 @@
+{% extends "common/layout.njk" %}
+
+{% set pageTitle = 'Home' %}
+{% set page = 'home' %}
+
+{% block content %}
+  <div class="defra-hero">
+    <div class="govuk-width-container">
+      <h1 class="govuk-heading-xl">Defra MCP Registry</h1>
+      <p class="govuk-body-l">
+        Defra's approved list of Model Context Protocol (MCP) servers for use with GitHub Copilot
+        and other AI coding assistants. Only servers listed here are sanctioned for use within
+        Defra Digital Delivery.
+      </p>
+    </div>
+  </div>
+
+  <div class="govuk-width-container">
+
+    <div class="govuk-grid-row govuk-!-margin-top-6">
+      <div class="govuk-grid-column-full">
+
+        {% if servers and servers | length > 0 %}
+
+          <div class="defra-tile-grid" role="list">
+            {% for server in servers %}
+              {% set firstTransport = server.transports[0] if server.transports and server.transports | length > 0 else null %}
+
+              <div class="defra-tile" role="listitem">
+
+                {#
+                  Status badge: rendered as non-interactive <strong> so it is informational only.
+                  It sits visually above the heading but is covered by the defra-tile__link::after
+                  pseudo-element (full-card click target), which is correct — the badge is not a link.
+                #}
+                {% if server.status == 'active' %}
+                  <strong class="govuk-tag govuk-tag--green govuk-!-margin-bottom-2">Active</strong>
+                {% endif %}
+
+                {#
+                  Heading link — the only interactive element in the card.
+                  The defra-tile__link::after pseudo-element stretches this link's click target
+                  across the entire card, giving mouse/touch users a large hit area while keeping
+                  the accessible link name concise (just the server title) for screen readers.
+                  Opens in a new tab because it points to an external site.
+                #}
+                <h2 class="govuk-heading-m defra-tile__title">
+                  <a
+                    class="defra-tile__link"
+                    href="{{ server.websiteUrl }}"
+                    target="_blank"
+                    rel="noreferrer noopener"
+                  >{{ server.title }}</a>
+                </h2>
+
+                {% if server.description %}
+                  <p class="govuk-body defra-tile__body">{{ server.description }}</p>
+                {% endif %}
+
+                {# Version and primary transport type — secondary metadata #}
+                {% if server.version or firstTransport %}
+                  <p class="govuk-body-s govuk-!-margin-top-3 govuk-!-margin-bottom-0">
+                    {% if server.version %}
+                      <span>v{{ server.version }}</span>
+                    {% endif %}
+                    {% if firstTransport %}
+                      <span class="govuk-!-margin-left-2">{{ firstTransport.type | upper }}</span>
+                    {% endif %}
+                  </p>
+                {% endif %}
+
+              </div>
+            {% endfor %}
+          </div>
+
+        {% else %}
+
+          <div class="govuk-inset-text">
+            No approved servers in the registry yet.
+          </div>
+
+        {% endif %}
+
+      </div>
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-8">
+      <div class="govuk-grid-column-three-quarters">
+
+        <h2 class="govuk-heading-m">About this registry</h2>
+
+        <p class="govuk-body">
+          This is the tactical Defra MCP server registry — a curated list of approved
+          Model Context Protocol (MCP) servers that Defra teams are permitted to use with
+          GitHub Copilot and compatible AI tooling. Servers are reviewed and approved by
+          the AI Capabilities and Enablement (AICE) team before being listed here.
+        </p>
+
+        <p class="govuk-body">
+          The registry API is publicly available and is compliant with the v0.1 MCP registry
+          specification, meaning approved servers are discoverable by any compatible MCP client
+          or AI assistant configured to use this registry.
+        </p>
+
+        <h3 class="govuk-heading-s">Request a server</h3>
+
+        <p class="govuk-body">
+          To request that a server be added to the registry, contact the AICE team via
+          Slack <a class="govuk-link" href="{{ aceSlackChannel }}">#ask-ace</a>.
+          Please include a link to the server's repository and a brief description of
+          the use case.
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

@@ -1,0 +1,55 @@
+[
+  {
+    "id": "com.example/test-stdio-server",
+    "title": "Test Stdio Server",
+    "description": "A test MCP server fixture using stdio transport.",
+    "version": "1.0.0",
+    "websiteUrl": "https://example.com/test-stdio-server",
+    "transports": [
+      {
+        "type": "stdio",
+        "package": {
+          "registryType": "npm",
+          "identifier": "@example/test-stdio-server",
+          "runtimeHint": "npx"
+        },
+        "env": {
+          "TEST_TOKEN": "<token>"
+        }
+      }
+    ],
+    "status": "active",
+    "publishedAt": "2000-01-01T00:00:00Z",
+    "updatedAt": "2000-01-01T00:00:00Z"
+  },
+  {
+    "id": "com.example/test-http-server",
+    "title": "Test HTTP Server",
+    "description": "A test MCP server fixture using HTTP and stdio transports.",
+    "version": "latest",
+    "websiteUrl": "https://example.com/test-http-server",
+    "transports": [
+      {
+        "type": "http",
+        "url": "https://example.com/mcp",
+        "headers": {
+          "Authorization": "Bearer <token>"
+        }
+      },
+      {
+        "type": "stdio",
+        "package": {
+          "registryType": "docker",
+          "identifier": "example/test-http-server",
+          "runtimeHint": "docker"
+        },
+        "env": {
+          "TEST_TOKEN": "<token>"
+        }
+      }
+    ],
+    "status": "active",
+    "publishedAt": "2000-01-01T00:00:00Z",
+    "updatedAt": "2000-01-01T00:00:00Z"
+  }
+]

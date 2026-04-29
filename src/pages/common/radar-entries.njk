@@ -1,0 +1,31 @@
+{% from "common/status-classifications.njk" import ring_tag %}
+
+{% macro radar_ring_labels(variant) %}
+  {% set ring_labels = ['Endorse', 'Pilot', 'Assess', 'Do Not Use'] %}
+  {% if variant == 'reversed' %}
+    {% set labels = ring_labels | reverse %}
+  {% else %}
+    {% set labels = ring_labels %}
+  {% endif %}
+
+  <div class="radar-ring-labels radar-ring-labels--{{ variant }}">
+    {% for label in labels %}
+      <span class="govuk-body radar-ring-label">{{ label }}</span>
+    {% endfor %}
+  </div>
+{% endmacro %}
+
+{% macro radar_entries(rings) %}
+  {% for ring in rings %}
+    {% if ring.entries and ring.entries | length > 0 %}
+      <h2 class="govuk-heading-m govuk-!-margin-top-4">{{ ring_tag(ring.name) }}</h2>
+      {% for entry in ring.entries %}
+        <section id="{{ entry.id }}" class="govuk-!-margin-top-3 radar-entry">
+          <h3 class="govuk-heading-s govuk-!-margin-bottom-1">{{ entry.label }}. {{ entry.title }}</h3>
+          <p class="govuk-body-s govuk-!-margin-bottom-2">{{ entry.description }}</p>
+          <p class="govuk-!-margin-bottom-0"><a class="govuk-link" href="/{{ entry.quadrant | lower }}/{{ entry.id }}">Read more</a></p>
+        </section>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endmacro %}

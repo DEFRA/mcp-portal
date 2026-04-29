@@ -1,0 +1,34 @@
+[
+  {
+    "id": "com.sonarsource/sonarqube-mcp-server",
+    "title": "SonarQube MCP Server",
+    "description": "The SonarQube MCP Server connects your AI coding agent to SonarQube's code quality and security data, providing tools for code analysis, issue review, quality gates, security hotspots, and coverage.",
+    "version": "latest",
+    "websiteUrl": "https://docs.sonarsource.com/sonarqube-mcp-server",
+    "transports": [
+      {
+        "type": "http",
+        "url": "https://api.sonarcloud.io/mcp",
+        "headers": {
+          "Authorization": "Bearer <YourSonarQubeUserToken>",
+          "SONARQUBE_ORG": "<YourOrganizationName>"
+        }
+      },
+      {
+        "type": "stdio",
+        "package": {
+          "registryType": "docker",
+          "identifier": "mcp/sonarqube",
+          "runtimeHint": "docker"
+        },
+        "env": {
+          "SONARQUBE_TOKEN": "<YourSonarQubeUserToken>",
+          "SONARQUBE_ORG": "<YourOrganizationName>"
+        }
+      }
+    ],
+    "status": "active",
+    "publishedAt": "2025-04-28T00:00:00Z",
+    "updatedAt": "2025-04-28T00:00:00Z"
+  }
+]
