@@ -1,0 +1,75 @@
+{% extends "common/layout.njk" %}
+
+{% set pageTitle = 'Getting started' %}
+{% set page = 'getting-started' %}
+
+{% block content %}
+  <div class="govuk-width-container govuk-!-margin-top-6 govuk-!-margin-bottom-8">
+
+    <div class="govuk-grid-row">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h1 class="govuk-heading-l">Getting started</h1>
+
+        <h2 class="govuk-heading-m">Using this registry with GitHub Copilot</h2>
+
+        <p class="govuk-body">
+          GitHub Copilot supports MCP server allowlist enforcement at the organisation level.
+          An organisation administrator can set a registry URL in their Copilot policy settings.
+          When the policy is set to <strong>Registry only</strong>, Copilot checks each configured
+          MCP server against the registry and flags any server whose ID is not listed.
+          See the
+          <a class="govuk-link" href="https://docs.github.com/en/copilot/reference/mcp-allowlist-enforcement" target="_blank" rel="noreferrer noopener">GitHub Copilot MCP allowlist enforcement documentation</a>
+          for full details.
+        </p>
+
+        <p class="govuk-body">
+          Defra runs two GitHub organisations for Copilot — one for wider production use and one
+          for testing and evaluation. Each organisation's registry URL is pointed at a different
+          channel of this registry:
+        </p>
+
+        <ul class="govuk-list govuk-list--bullet">
+          <li>
+            <strong>Production organisation</strong> — registry URL set to the
+            <strong class="govuk-tag govuk-tag--blue">Stable</strong> channel
+            (<code>/registry/stable/v0.1/servers</code>), which returns only fully approved servers.
+          </li>
+          <li>
+            <strong>Testing organisation</strong> — registry URL set to the
+            <strong class="govuk-tag govuk-tag--yellow">Canary</strong> channel
+            (<code>/registry/canary/v0.1/servers</code>), which includes all stable servers plus
+            those currently under evaluation.
+          </li>
+        </ul>
+
+        <h2 class="govuk-heading-m">Adding a server to the registry</h2>
+
+        <p class="govuk-body">
+          All servers go through a two-stage process before becoming available to all Defra teams.
+        </p>
+
+        <ol class="govuk-list govuk-list--number">
+          <li>
+            <strong>Canary.</strong> New servers are added to the Canary channel first. At this
+            stage they are available only to designated pilot teams. The AICE team evaluates
+            the server against Defra's security, licensing and supportability criteria.
+          </li>
+          <li>
+            <strong>Stable.</strong> Once evaluation is complete and the server is approved,
+            it is promoted to the Stable channel and becomes available to all Defra teams.
+          </li>
+        </ol>
+
+        <p class="govuk-body">
+          To propose a server for evaluation, contact the AICE team via
+          Slack <a class="govuk-link" href="{{ aceSlackChannel }}">#ask-ace</a>.
+          Include a link to the server's repository, a brief description of the use case,
+          and any relevant security or licensing information.
+        </p>
+
+      </div>
+    </div>
+
+  </div>
+{% endblock %}

@@ -18,6 +18,74 @@
   <div class="govuk-width-container">
 
     <div class="govuk-grid-row govuk-!-margin-top-6">
+      <div class="govuk-grid-column-two-thirds">
+
+        <h2 class="govuk-heading-m">About this registry</h2>
+
+        <p class="govuk-body">
+          This is the tactical Defra MCP server registry — a curated list of approved
+          Model Context Protocol (MCP) servers that Defra teams are permitted to use with
+          GitHub Copilot and compatible AI tooling. Servers are reviewed and approved by
+          the AI Capabilities and Enablement (AICE) team before being listed here.
+        </p>
+
+        <p class="govuk-body">
+          The registry API is publicly available and is compliant with the v0.1 MCP registry
+          specification, meaning approved servers are discoverable by any compatible MCP client
+          or AI assistant configured to use this registry.
+          <a class="govuk-link" href="/getting-started">Find out how to configure GitHub Copilot and request new servers.</a>
+        </p>
+
+      </div>
+    </div>
+
+    <div class="govuk-grid-row govuk-!-margin-top-4">
+      <div class="govuk-grid-column-two-thirds">
+
+        {# Channel filter controls #}
+        <p class="govuk-body govuk-!-margin-bottom-1"><strong>Filter by channel</strong></p>
+        <ul class="defra-filter-chips" aria-label="Filter servers by channel">
+          {% set channels = [
+            { value: 'all',    label: 'All' },
+            { value: 'stable', label: 'Stable' },
+            { value: 'canary', label: 'Canary' }
+          ] %}
+          {% for item in channels %}
+            <li>
+              <a
+                class="defra-filter-chips__item"
+                href="/?channel={{ item.value }}"
+                {% if activeChannel == item.value %}aria-current="true"{% endif %}
+              >{{ item.label }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {# Channel key — explains what each channel means and makes the hierarchy clear #}
+        <dl class="defra-channel-key">
+          <div class="defra-channel-key__row">
+            <dt class="defra-channel-key__term">
+              <strong class="govuk-tag govuk-tag--blue">Stable</strong>
+            </dt>
+            <dd class="defra-channel-key__desc">
+              Approved and verified MCP servers, safe for use across all Defra teams.
+            </dd>
+          </div>
+          <div class="defra-channel-key__row">
+            <dt class="defra-channel-key__term">
+              <strong class="govuk-tag govuk-tag--yellow">Canary</strong>
+            </dt>
+            <dd class="defra-channel-key__desc">
+              Includes all Stable servers, plus servers currently under evaluation.
+              Use only within designated pilot teams.
+            </dd>
+          </div>
+        </dl>
+
+      </div>
+    </div>
+
+    <div class="govuk-grid-row">
       <div class="govuk-grid-column-full">
 
         {% if servers and servers | length > 0 %}
@@ -29,13 +97,20 @@
               <div class="defra-tile" role="listitem">
 
                 {#
-                  Status badge: rendered as non-interactive <strong> so it is informational only.
-                  It sits visually above the heading but is covered by the defra-tile__link::after
-                  pseudo-element (full-card click target), which is correct — the badge is not a link.
+                  Status and channel badges: rendered as non-interactive <strong> elements.
+                  They sit visually above the heading but are covered by the defra-tile__link::after
+                  pseudo-element (full-card click target), which is correct — badges are not links.
                 #}
-                {% if server.status == 'active' %}
-                  <strong class="govuk-tag govuk-tag--green govuk-!-margin-bottom-2">Active</strong>
-                {% endif %}
+                <div class="govuk-!-margin-bottom-2">
+                  {% if server.status == 'active' %}
+                    <strong class="govuk-tag govuk-tag--green govuk-!-margin-right-1">Active</strong>
+                  {% endif %}
+                  {% if server.channel == 'stable' %}
+                    <strong class="govuk-tag govuk-tag--blue">Stable</strong>
+                  {% elif server.channel == 'canary' %}
+                    <strong class="govuk-tag govuk-tag--yellow">Canary</strong>
+                  {% endif %}
+                </div>
 
                 {#
                   Heading link — the only interactive element in the card.
@@ -80,36 +155,6 @@
           </div>
 
         {% endif %}
-
-      </div>
-    </div>
-
-    <div class="govuk-grid-row govuk-!-margin-top-6 govuk-!-margin-bottom-8">
-      <div class="govuk-grid-column-three-quarters">
-
-        <h2 class="govuk-heading-m">About this registry</h2>
-
-        <p class="govuk-body">
-          This is the tactical Defra MCP server registry — a curated list of approved
-          Model Context Protocol (MCP) servers that Defra teams are permitted to use with
-          GitHub Copilot and compatible AI tooling. Servers are reviewed and approved by
-          the AI Capabilities and Enablement (AICE) team before being listed here.
-        </p>
-
-        <p class="govuk-body">
-          The registry API is publicly available and is compliant with the v0.1 MCP registry
-          specification, meaning approved servers are discoverable by any compatible MCP client
-          or AI assistant configured to use this registry.
-        </p>
-
-        <h3 class="govuk-heading-s">Request a server</h3>
-
-        <p class="govuk-body">
-          To request that a server be added to the registry, contact the AICE team via
-          Slack <a class="govuk-link" href="{{ aceSlackChannel }}">#ask-ace</a>.
-          Please include a link to the server's repository and a brief description of
-          the use case.
-        </p>
 
       </div>
     </div>

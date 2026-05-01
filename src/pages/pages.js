@@ -1,3 +1,4 @@
+import { gettingStartedRouter } from './getting-started/router.js'
 import { registryRouter } from './registry/router.js'
 
 const pageRouter = {
@@ -5,7 +6,8 @@ const pageRouter = {
     name: 'pageRouter',
     async register (server) {
       await server.register([
-        registryRouter
+        registryRouter,
+        gettingStartedRouter
       ])
     }
   }

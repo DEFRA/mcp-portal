@@ -27,6 +27,7 @@
         }
       }
     ],
+    "channel": "stable",
     "status": "active",
     "publishedAt": "2025-04-28T00:00:00Z",
     "updatedAt": "2025-04-28T00:00:00Z"

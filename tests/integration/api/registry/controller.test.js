@@ -29,11 +29,11 @@ describe('#registryApiController', () => {
     await server.stop({ timeout: 0 })
   })
 
-  describe('GET /v0.1/servers', () => {
-    test('should return 200 with server list', async () => {
+  describe('GET /registry/canary/v0.1/servers', () => {
+    test('should return 200 with all servers', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers'
+        url: '/registry/canary/v0.1/servers'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
@@ -42,36 +42,21 @@ describe('#registryApiController', () => {
       expect(result.metadata).toMatchObject({ count: expect.any(Number) })
     })
 
-    test('should include the stdio test server', async () => {
+    test('should include both stable and canary servers', async () => {
       const { result } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers'
+        url: '/registry/canary/v0.1/servers'
       })
 
-      const stdioServer = result.servers.find(
-        (s) => s.server.name === 'com.example/test-stdio-server'
-      )
-      expect(stdioServer).toBeDefined()
-      expect(stdioServer.server.title).toBe('Test Stdio Server')
-    })
-
-    test('should include the http test server', async () => {
-      const { result } = await server.inject({
-        method: 'GET',
-        url: '/v0.1/servers'
-      })
-
-      const httpServer = result.servers.find(
-        (s) => s.server.name === 'com.example/test-http-server'
-      )
-      expect(httpServer).toBeDefined()
-      expect(httpServer.server.title).toBe('Test HTTP Server')
+      const names = result.servers.map((s) => s.server.name)
+      expect(names).toContain('com.example/test-stdio-server')
+      expect(names).toContain('com.example/test-http-server')
     })
 
     test('should include CORS headers', async () => {
       const { headers } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers'
+        url: '/registry/canary/v0.1/servers'
       })
 
       expect(headers['access-control-allow-origin']).toBe('*')
@@ -80,11 +65,59 @@ describe('#registryApiController', () => {
     })
   })
 
-  describe('OPTIONS /v0.1/servers', () => {
+  describe('GET /registry/stable/v0.1/servers', () => {
+    test('should return 200 with only stable servers', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/registry/stable/v0.1/servers'
+      })
+
+      expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
+      expect(result.servers).toBeInstanceOf(Array)
+    })
+
+    test('should include only stable-tagged servers', async () => {
+      const { result } = await server.inject({
+        method: 'GET',
+        url: '/registry/stable/v0.1/servers'
+      })
+
+      const names = result.servers.map((s) => s.server.name)
+      expect(names).toContain('com.example/test-stdio-server')
+      expect(names).not.toContain('com.example/test-http-server')
+    })
+
+    test('should include CORS headers', async () => {
+      const { headers } = await server.inject({
+        method: 'GET',
+        url: '/registry/stable/v0.1/servers'
+      })
+
+      expect(headers['access-control-allow-origin']).toBe('*')
+      expect(headers['access-control-allow-methods']).toBe('GET, OPTIONS')
+      expect(headers['access-control-allow-headers']).toBe('Authorization, Content-Type')
+    })
+  })
+
+  describe('GET /registry/v0.1/servers (default alias)', () => {
+    test('should behave like stable and return only stable servers', async () => {
+      const { result, statusCode } = await server.inject({
+        method: 'GET',
+        url: '/registry/v0.1/servers'
+      })
+
+      expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
+      const names = result.servers.map((s) => s.server.name)
+      expect(names).toContain('com.example/test-stdio-server')
+      expect(names).not.toContain('com.example/test-http-server')
+    })
+  })
+
+  describe('OPTIONS /registry/canary/v0.1/servers', () => {
     test('should handle CORS preflight', async () => {
       const { statusCode, headers } = await server.inject({
         method: 'OPTIONS',
-        url: '/v0.1/servers'
+        url: '/registry/canary/v0.1/servers'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_NO_CONTENT)
@@ -94,11 +127,11 @@ describe('#registryApiController', () => {
     })
   })
 
-  describe('GET /v0.1/servers/{serverName}/versions/latest', () => {
+  describe('GET /registry/canary/v0.1/servers/{serverName}/versions/latest', () => {
     test('should return the latest version of a known server', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
@@ -108,7 +141,7 @@ describe('#registryApiController', () => {
     test('should include CORS headers', async () => {
       const { headers } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-stdio-server/versions/latest'
       })
 
       expect(headers['access-control-allow-origin']).toBe('*')
@@ -117,28 +150,37 @@ describe('#registryApiController', () => {
     test('should return 404 for unknown server', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Fdoes-not-exist/versions/latest'
+        url: '/registry/canary/v0.1/servers/com.example%2Fdoes-not-exist/versions/latest'
+      })
+
+      expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)
+    })
+
+    test('should return 404 for canary-only server on stable channel', async () => {
+      const { statusCode } = await server.inject({
+        method: 'GET',
+        url: '/registry/stable/v0.1/servers/com.example%2Ftest-http-server/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)
     })
   })
 
-  describe('GET /v0.1/servers/{serverName}/versions/{version}', () => {
+  describe('GET /registry/canary/v0.1/servers/{serverName}/versions/{version}', () => {
     test('should return a specific version of a known server', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
       expect(result.server.version).toBe('1.0.0')
     })
 
-    test('should return the http test server at version latest', async () => {
+    test('should return the http test server at version latest on canary', async () => {
       const { result, statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-http-server/versions/latest'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-http-server/versions/latest'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_OK)
@@ -148,7 +190,7 @@ describe('#registryApiController', () => {
     test('should include CORS headers', async () => {
       const { headers } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-stdio-server/versions/1.0.0'
       })
 
       expect(headers['access-control-allow-origin']).toBe('*')
@@ -157,7 +199,7 @@ describe('#registryApiController', () => {
     test('should return 404 for unknown version', async () => {
       const { statusCode } = await server.inject({
         method: 'GET',
-        url: '/v0.1/servers/com.example%2Ftest-stdio-server/versions/99.0.0'
+        url: '/registry/canary/v0.1/servers/com.example%2Ftest-stdio-server/versions/99.0.0'
       })
 
       expect(statusCode).toBe(statusCodes.HTTP_STATUS_NOT_FOUND)

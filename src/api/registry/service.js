@@ -28,6 +28,7 @@ const serverSchema = Joi.object({
   websiteUrl: Joi.string().uri().required(),
   repository: Joi.object().optional(),
   transports: Joi.array().items(Joi.object()).min(1).required(),
+  channel: Joi.string().valid('stable', 'canary').required(),
   status: Joi.string().valid('active', 'deprecated', 'inactive').required(),
   publishedAt: Joi.string().isoDate().required(),
   updatedAt: Joi.string().isoDate().required()
@@ -64,34 +65,43 @@ async function _loadServers () {
 }
 
 /**
- * Get all MCP servers.
+ * Get all MCP servers, optionally filtered by channel.
+ * When channel is 'stable', only stable-tagged servers are returned.
+ * When channel is 'canary' or omitted, all servers are returned.
  *
- * @returns {Promise<McpServer[]>} Array of all server objects
+ * @param {string} [channel] - 'stable' | 'canary' | undefined
+ * @returns {Promise<McpServer[]>} Array of server objects
  */
-async function getServers () {
-  return _loadServers()
+async function getServers (channel) {
+  const servers = await _loadServers()
+  if (channel === 'stable') {
+    return servers.filter((s) => s.channel === 'stable')
+  }
+  return servers
 }
 
 /**
- * Get a specific server by ID.
+ * Get a specific server by ID, optionally filtered by channel.
  *
  * @param {string} id - The server's qualified name (e.g., 'io.github.github/github-mcp-server')
+ * @param {string} [channel] - 'stable' | 'canary' | undefined
  * @returns {Promise<McpServer|undefined>} The server object or undefined if not found
  */
-async function getServer (id) {
-  const servers = await _loadServers()
+async function getServer (id, channel) {
+  const servers = await getServers(channel)
   return servers.find((s) => s.id === id)
 }
 
 /**
- * Get a specific version of a server.
+ * Get a specific version of a server, optionally filtered by channel.
  *
  * @param {string} id - The server's qualified name
  * @param {string} version - The server version
+ * @param {string} [channel] - 'stable' | 'canary' | undefined
  * @returns {Promise<McpServer|undefined>} The server object or undefined if not found
  */
-async function getServerVersion (id, version) {
-  const servers = await _loadServers()
+async function getServerVersion (id, version, channel) {
+  const servers = await getServers(channel)
   return servers.find((s) => s.id === id && s.version === version)
 }
 
