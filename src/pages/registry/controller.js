@@ -9,9 +9,15 @@ import { getServers } from '../../api/registry/service.js'
  *
  * @returns {import('@hapi/hapi').ResponseObject} The response object for the homepage
  */
-async function getRegistry (_request, h) {
-  const servers = await getServers()
-  return h.view('registry/page.njk', { servers })
+async function getRegistry (request, h) {
+  const { channel = 'all' } = request.query
+
+  const allServers = await getServers()
+  const servers = channel === 'all'
+    ? allServers
+    : allServers.filter((s) => s.channel === channel)
+
+  return h.view('registry/page.njk', { servers, activeChannel: channel })
     .code(statusCodes.HTTP_STATUS_OK)
 }
 
